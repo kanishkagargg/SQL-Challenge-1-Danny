@@ -1,0 +1,99 @@
+--1
+with sales_menu as (select * from sales s
+join menu mn
+on s.product_id = mn.product_id)
+
+select customer_id, sum(price) as Amount_spent from sales_menu
+group by customer_id;
+
+--2
+select customer_id, count(distinct(order_date)) as no_of_days_visited from sales
+group by customer_id;
+
+--3
+with sales_menu as (select s.customer_id, s.order_date, mn.product_name, 
+dense_rank() over (partition by customer_id order by s.order_date) as rank from sales s
+join menu mn
+on s.product_id = mn.product_id
+group by s.customer_id, s.order_date,mn.product_name
+order by s.order_date asc)
+
+select customer_id, order_date, product_name as first_purchased from sales_menu
+where rank = 1;
+
+--4
+with sales_menu as (select * from sales s
+join menu mn
+on s.product_id = mn.product_id)
+
+select product_name, count(product_name) as no_of_times_purchased from sales_menu
+group by product_name
+order by count(product_name) desc
+limit 1;
+
+--5
+with sales_menu as (select s.customer_id, mn.product_name, count(mn.product_name) as count_of_product, 
+					dense_rank() over (partition by customer_id order by count(product_name) desc ) as rank
+				    from sales s
+					join menu mn
+					on s.product_id = mn.product_id
+					group by s.customer_id, mn.product_name
+				  )
+select customer_id, product_name, count_of_product from sales_menu
+where rank = 1;
+
+
+--6						
+with combined_table as (select min(s.order_date) as after_joindate, s.customer_id, mn.product_name from sales s
+					    natural join menu mn
+						natural join members mm
+					   group by customer_id, order_date, join_date, product_name
+					   having join_date < order_date)
+					  
+
+select min(after_joindate), customer_id, product_name from combined_table
+group by customer_id, product_name
+limit 2;
+
+--7
+with combined_table as (select min(s.order_date) as after_joindate, s.customer_id, mn.product_name from sales s
+					    natural join menu mn
+						natural join members mm
+					   group by customer_id, order_date, join_date, product_name
+					   having join_date > order_date)
+					  
+
+select min(after_joindate), customer_id, product_name from combined_table
+group by customer_id, product_name
+limit 3;
+
+--8
+with combined_table as (select s.order_date, s.customer_id, mn.product_name, mm.join_date, mn.price from sales s
+					    natural join menu mn
+						natural join members mm
+					    where mm.join_date > s.order_date)
+					  
+
+select customer_id, sum(price) as amount_spent, count(product_name) as total_items from combined_table
+group by customer_id;
+
+--9
+with sales_menu as (select *, CASE
+   WHEN product_name = 'sushi' THEN 20
+   ELSE 10
+END as num
+from sales s
+join menu mn
+on s.product_id = mn.product_id
+)
+
+select customer_id, sum(price*num) as total_points from sales_menu
+group by customer_id;
+
+--10
+select s.customer_id, sum(20*mn.price)
+from sales s
+natural join menu mn
+natural join members mm
+where mm.join_date <= s.order_date and order_date < '2021-01-31'
+group by s.customer_id;
