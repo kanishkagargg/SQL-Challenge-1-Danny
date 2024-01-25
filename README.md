@@ -5,6 +5,7 @@ This is the first challenge by Danny Ma, named as Danny's Dinner: Then Taste of 
 He plans on using these insights to help him decide whether he should expand the existing customer loyalty program - additionally he needs help to generate some basic datasets so his team can easily inspect the data without needing to use SQL.
 
 Danny has shared with you 3 key datasets for this case study:
-  sales
-  menu
-  members
+
+  1) sales
+  2) menu
+  3) members
